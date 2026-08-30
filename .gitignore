@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next
+/out
+
+# test and build output
+/coverage
+*.tsbuildinfo
+
+# local credentials (the unrelated .env.openaikey must remain untouched)
+.env*
+!.env.example
+
+# system and editor files
+.DS_Store
+.idea
+.vscode
