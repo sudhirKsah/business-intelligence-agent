@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Skylark Drones - Decision Log</title>
+  <style>
+    @page { size: A4; margin: 12mm 14mm; }
+    * { box-sizing: border-box; }
+    body { color: #172019; font: 9.2pt/1.28 Arial, sans-serif; margin: 0; }
+    h1 { border-bottom: 2px solid #175d3f; font-size: 18pt; margin: 0 0 4mm; padding-bottom: 2mm; }
+    h2 { color: #175d3f; font-size: 11pt; margin: 3.2mm 0 1.2mm; }
+    p { margin: 0 0 1.6mm; }
+    .meta { color: #4d5b52; font-size: 8.5pt; margin-bottom: 3mm; }
+    table { border-collapse: collapse; font-size: 8pt; line-height: 1.2; margin: 1.5mm 0; width: 100%; }
+    th, td { border: 1px solid #aeb8b0; padding: 1.2mm 1.5mm; text-align: left; vertical-align: top; }
+    th { background: #e8eee8; }
+    ul { margin: 1mm 0 1mm 4mm; padding-left: 3mm; }
+    li { margin-bottom: .7mm; }
+  </style>
+</head>
+<body>
+  <h1>Decision Log</h1>
+  <div class="meta"><strong>Project:</strong> Skylark Drones monday.com BI Agent</div>
+
+  <h2>Goal And Scope</h2>
+  <p>I prioritized one explainable end-to-end path over a broad analytics product: founder question, validated plan, live read-only monday.com data, normalization, deterministic calculation, then a concise answer with insight, caveats, and retrieval time.</p>
+  <p>The committed catalog is Open Deals pipeline/health, Work Order inclusive-GST financials, execution/billing exceptions, and exact-sector comparisons. Weighted forecasting, excluded-GST analysis, overdue logic, dashboards, durable chat history, and row-level cross-board journeys are deliberately incomplete.</p>
+
+  <h2>Assumptions</h2>
+  <ul>
+    <li><strong>Open</strong> defines active pipeline. Pipeline time means Tentative Close Date; calendar quarters use Asia/Kolkata and inclusive boundaries.</li>
+    <li>Masked Deal value has unknown currency/scale, so it is never labeled INR or revenue. Work Order financials use direct inclusive-GST source columns; blanks are unknown, not zero.</li>
+    <li>Every monday item is retained by default. Totals are board-item totals because duplicate-looking records cannot safely be deleted without a business key.</li>
+    <li>Exact normalized sectors are comparable across boards, but rows are not joinable. Energy requires clarification to Renewables, Powerline, or both.</li>
+    <li>Public evaluation uses server-side credentials. Runtime code is query-only and exposes no token.</li>
+  </ul>
+
+  <h2>Key Decisions And Trade-offs</h2>
+  <table>
+    <thead><tr><th>Decision</th><th>Rationale and trade-off</th></tr></thead>
+    <tbody>
+      <tr><td>Next.js + TypeScript on Vercel</td><td>One UI/API codebase minimizes delivery time. Separate services are unnecessary at this scale.</td></tr>
+      <tr><td>monday GraphQL API, not MCP</td><td>Static queries, cursor pagination, errors, and deployment are easier to inspect. The client defines no mutations.</td></tr>
+      <tr><td>Groq GPT-OSS only for planning</td><td>Strict JSON Schema output keeps natural language flexible while validated handlers own every filter and calculation. The trade-off is a narrow intent catalog.</td></tr>
+      <tr><td>Deterministic TypeScript and decimals</td><td>Prevents hallucinated totals and floating-point drift; each metric derives from fetched values and tested formulas.</td></tr>
+      <tr><td>Runtime column-title mapping</td><td>Generated monday IDs vary. Missing required titles fail clearly instead of returning partial results.</td></tr>
+      <tr><td>Runtime normalization, no write-back</td><td>Preserves source evidence/read-only behavior. Invalid and missing coverage is disclosed rather than silently repaired.</td></tr>
+      <tr><td>No row-level cross-board join</td><td>The files provide no trustworthy foreign key. Sector-level results remain independent to avoid false attribution.</td></tr>
+      <tr><td>Targeted clarifications</td><td>Revenue asks for a supported measure; Energy asks for source-sector meaning. Unsupported follow-ups return a boundary.</td></tr>
+      <tr><td>Uncached prototype reads</td><td>Makes dynamic data easy to prove. Production should add a short TTL with visible retrieval time and invalidation.</td></tr>
+      <tr><td>Focused chat and tests</td><td>Answer quality takes priority over dashboards and broad UI automation. Tests target data rules, BI, pagination/errors, and clarification.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Data Handling</h2>
+  <p>Null/blank/NA stays missing, zero stays zero, invalid numeric text never becomes zero, negatives remain, and month-only text receives no invented year. Embedded Deal headers are excluded and counted. Possible duplicates remain with a no-deduplication caveat. Tender/DSP stay source values but are flagged as potentially non-sector labels. GraphQL errors or incomplete pages invalidate the request; partial monday data is never aggregated.</p>
+
+  <h2>Leadership Updates</h2>
+  <p>I interpret this as a short defensible brief: summary, key numbers, one or two calculated observations, material data gaps, and retrieval details. Normal answers use that structure. A slide/report generator was deferred because presentation breadth should follow metric reliability.</p>
+
+  <h2>With More Time</h2>
+  <p>I would first establish governed metric definitions and an authoritative Deal-to-Work-Order key; then add authenticated multi-tenant access, short-lived caching, observability, source update timestamps, richer cohort/trend analysis, and broader end-to-end/accessibility tests. Dashboards and downloadable leadership reports would follow those foundations.</p>
+</body>
+</html>
