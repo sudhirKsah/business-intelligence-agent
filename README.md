@@ -4,9 +4,9 @@ A focused, read-only conversational agent for founder-level questions over live 
 
 The LLM only converts natural language into a validated query plan or clarification. It never calculates metrics. All filtering, grouping, decimal aggregation, ratios, insights, and caveats come from deterministic TypeScript operating on data fetched from monday.com for the current request.
 
-## Status
+**Live application:** https://business-intelligence-agent-gilt.vercel.app/
 
-Implemented:
+## Features
 
 - Dynamic, cursor-paginated monday.com GraphQL reads with no mutations or source-data constants.
 - Runtime column discovery by normalized title rather than generated monday column IDs.
@@ -16,13 +16,6 @@ Implemented:
 - Structured LLM query planning, targeted Energy/revenue clarification, and explicit capability boundaries.
 - Responsive chat with starter prompts, clarification buttons, loading/retry, facts, insights, caveats, and sources.
 - Focused parser, BI, pagination/error, retry, and clarification tests.
-
-Manual completion still required:
-
-- Create/import the two monday.com boards and add credentials to `.env.local`.
-- Reconcile the imported live board counts and run the real end-to-end demo.
-- Deploy to Vercel and add the public URL here: **Not deployed yet**.
-- Create the public GitHub remote, push the reviewed source, and submit the final links.
 
 ## Supported Questions
 
@@ -46,7 +39,7 @@ Examples:
 
 Explicitly unsupported: weighted forecasts without probability weights, excluded-GST analysis, overdue calculations without payment terms/due dates, time-filtered Work Order/cross-board metrics without an agreed Work Order date basis, and record-level deal-to-delivery joins without a trustworthy key.
 
-## Architecture
+## Architecture Overview
 
 ```text
 Browser chat
@@ -72,18 +65,17 @@ src/lib/bi.ts              Deterministic calculations and answer sections
 src/lib/*.test.ts          Focused high-value tests
 ```
 
-## monday.com Setup
+## monday.com Configuration
 
 ### 1. Create the boards
 
 Import the supplied files as separate boards:
 
-- `Deal funnel Data.xlsx` -> a Deals board. Use `Deal Name` as the item name where monday's import flow permits it.
-- `Work_Order_Tracker Data.xlsx` -> a Work Orders board. Use `Serial #` as the item name where monday's import flow permits it.
+- `Deal funnel Data.xlsx` -> a Deals board. Use `Deal Name` as the item name.
+- `Work_Order_Tracker Data.xlsx` -> a Work Orders board. Use `Serial #` as the item name.
 
 Preserve every supplied column and row. Do not remove embedded headers, blanks, invalid values, negative amounts, or possible duplicates before import; the application handles or discloses them at read time.
 
-Use Date/Number/Status types where import is lossless. Keep mixed fields such as quantities, month-only values, invoice numbers, or columns containing errors as Text so raw meaning is not erased.
 
 ### 2. Preserve required column titles
 
@@ -148,8 +140,6 @@ Requirements: Node.js 20.9 or newer, npm, both monday.com boards, and a Groq API
 
 4. Open `http://localhost:3000` and run the demo prompts below.
 
-The unrelated `.env.openaikey` file is not used by this project and must remain untouched.
-
 ## Metric And Data Rules
 
 - **Open pipeline:** Deal Status exactly `Open`; On Hold is not included.
@@ -201,30 +191,7 @@ Current automated coverage is intentionally focused:
 5. Change one valued Open Deal by exactly one unit in the monday UI, repeat the query, observe a `+1` result delta, then restore it. The app itself never writes.
 6. Temporarily use an invalid board ID/token to confirm a safe error, then restore it.
 
-## Vercel Deployment
-
-1. Push the project to GitHub without `.env.local`, `.env.openaikey`, source spreadsheets, or build output.
-2. Import the repository into Vercel as a Next.js project.
-3. Add all variables from `.env.example` under Project Settings -> Environment Variables.
-4. Deploy; no database or background service is required.
-5. Test one direct prompt and one clarification flow from an incognito desktop window and a mobile viewport.
-6. Confirm secrets are absent from browser source/network responses, then place the public URL in this README and the submission form.
-
-The prototype has no end-user login so the evaluator can test it directly. For a longer-lived public deployment, set Groq usage limits and use Vercel rate limiting/firewall controls to reduce indirect API-key abuse.
-
-## Assumptions And Trade-offs
-
-- The imported boards retain source titles and values.
-- Public demo credentials are held server-side so reviewers need no local setup.
-- The narrow intent catalog is deliberate: accurate, explainable answers are preferred to broad unsupported claims.
-- Live reads are uncached for a clear dynamic-data demonstration. A larger deployment should add short-lived caching with visible retrieval timestamps and invalidation rules.
-- Conversation state exists only in the browser and resets on refresh.
-- Styling is intentionally a single focused chat, not a dashboard.
 
 ## Challenges And Improvements
 
 The main data constraint is the lack of a cross-board key, followed by missing collection values, malformed Deal rows, ambiguous sector labels, inconsistent statuses, and unknown Deal-value units. With more time, add a governed semantic layer, an authoritative deal/work-order key, source freshness metadata, authentication/RBAC, cached reads, observability, broader date/cohort analytics, and fuller end-to-end tests.
-
-## AI Tools Used
-
-OpenCode with GPT-5.6 was used for assignment analysis, dataset profiling, planning, implementation assistance, and code-review passes. Groq `openai/gpt-oss-120b` is the runtime query planner using strict non-streaming JSON Schema output. The implementation was checked with deterministic tests, TypeScript, and the Next.js production build. The runtime LLM is limited to validated query planning and clarification; it is not trusted for business calculations.
